@@ -10,7 +10,7 @@ pub struct BasicAuth{
     pub password:String,
   }
   
-   impl  BasicAuth {
+impl  BasicAuth {
        fn from_authorization_header(header: &str) -> Option<BasicAuth>{
         let split = header.split_whitespace().collect::<Vec<_>>();
         if split.len() != 2 {
@@ -44,7 +44,7 @@ pub struct BasicAuth{
         });
   
         values
-       }
+       } 
    }
   
   #[rocket::async_trait]
