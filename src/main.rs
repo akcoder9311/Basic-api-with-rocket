@@ -9,18 +9,19 @@ mod models;
 mod schema;
 
 use diesel::prelude::*;
-use models::Rustacean;
-use rocket::serde::json::{Value, json};
+use models::{Rustacean,NewRustacean};
+use rocket::serde::json::{Value, json,Json};
 use rocket::response::status;
 use auth::BasicAuth;
 use schema::rustaceans;
+
 
 
 #[database("sqlite_db")]
 struct DbConn(diesel::SqliteConnection);
 
 #[get("/rustaceans")]
-async fn get_rustaceans(auth: BasicAuth, db:DbConn) -> Value{
+async fn get_rustaceans(_auth: BasicAuth, db:DbConn) -> Value{
          db.run(|c| {
             let result = rustaceans::table.limit(100).load::<Rustacean>(c).expect("failed to read rustaceans entries");
             json!(result)
@@ -34,9 +35,15 @@ fn view_rustacens(id:i32, _auth: BasicAuth)->Value{
 
 }
 
-#[post("/rustaceans" , format = "json")]
-fn  crete_rustaceans(_auth: BasicAuth)->Value{
-        json!([{"id":3,"name": "sahil","email": "sahil@gmail.com"}])
+#[post("/rustaceans" , format = "json" , data = "<new_rustacean>")]
+async fn crete_rustaceans(_auth: BasicAuth,db:DbConn ,new_rustacean: Json<NewRustacean> )->Value{
+       let result = db.run(|c| {  
+        diesel::insert_into(rustaceans::table)
+        .values(new_rustacean.into_inner())
+        .execute(c)
+        .expect("failed insertion new_rustacean entry ");
+       }).await;
+       json!(result)
 }
 
 // update for old resource
