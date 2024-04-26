@@ -7,13 +7,13 @@ extern crate diesel;
 mod auth;
 mod models;
 mod schema;
+mod repositories;
 
-use diesel::prelude::*;
+use repositories::RustaceanRepository;
 use models::{Rustacean,NewRustacean};
 use rocket::serde::json::{Value, json,Json};
 use rocket::response::status;
 use auth::BasicAuth;
-use schema::rustaceans;
 
 
 
@@ -21,42 +21,52 @@ use schema::rustaceans;
 struct DbConn(diesel::SqliteConnection);
 
 #[get("/rustaceans")]
-async fn get_rustaceans(auth: BasicAuth, db:DbConn) -> Value{
+async fn get_rustaceans(_auth: BasicAuth, db:DbConn) -> Value{
          db.run(|c| {
-            let result = rustaceans::table.limit(100).load::<Rustacean>(c).expect("failed to read rustaceans entries");
+            let result = RustaceanRepository::find_multiple(c ,100).expect("failed to read rustaceans entries");
             json!(result)
          }).await
 }
 
 // for create new 
 #[get("/rustaceans/<id>")]
-fn view_rustacens(id:i32, _auth: BasicAuth)->Value{
-  json!([{"id":id , "name":"ak khan","email":"antor@gmial.com"}])
+async fn view_rustacens(id:i32, _auth: BasicAuth,db:DbConn)->Value{
+     db.run(move |c| {
+   let rustacean = RustaceanRepository::find(c , id).expect("failed retrieving rustacean row");
+   json!(rustacean)
+  }).await
 
 }
 
 #[post("/rustaceans" , format = "json" , data = "<new_rustacean>")]
 async fn crete_rustaceans(_auth: BasicAuth,db:DbConn ,new_rustacean: Json<NewRustacean> )->Value{
        let result = db.run(|c| {  
-        diesel::insert_into(rustaceans::table)
-        .values(new_rustacean.into_inner())
-        .execute(c)
+          RustaceanRepository::create(c, new_rustacean.into_inner())
         .expect("failed insertion new_rustacean entry ");
        }).await;
        json!(result)
 }
 
 // update for old resource
-#[put("/rustaceans/<id>" , format = "json")]
-fn update_rustacens(id:i32, _auth: BasicAuth)->Value{
-  json!([{"id":id , "name":"ak khan","email":"antor@gmial.com"}])
+#[put("/rustaceans/<id>" , format = "json", data="<rustacean>")]
+async fn update_rustacens(id:i32, _auth: BasicAuth, db:DbConn ,rustacean: Json<Rustacean>) -> Value {
+
+   db.run(move |c| {
+     let result =  RustaceanRepository::save(c, id, rustacean.into_inner())
+   .expect("failed updating rustacean entry ");
+   json!(result)
+}).await
 }
 
 
 // delete exsisting data
-#[delete("/rustaceans/<_id>")]
-fn delete_rustaceans(_id:i32, _auth: BasicAuth)->status::NoContent{
-  status::NoContent
+#[delete("/rustaceans/<id>")]
+async fn delete_rustaceans(id:i32, _auth: BasicAuth, db:DbConn )->status::NoContent{
+   db.run(move |c| {
+    RustaceanRepository::delete(c,id)
+       .expect("failed to delete rustacean entry ");
+      status::NoContent
+   }).await
 }
 
 #[catch(404)]
