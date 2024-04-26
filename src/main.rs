@@ -21,7 +21,7 @@ use schema::rustaceans;
 struct DbConn(diesel::SqliteConnection);
 
 #[get("/rustaceans")]
-async fn get_rustaceans(_auth: BasicAuth, db:DbConn) -> Value{
+async fn get_rustaceans(auth: BasicAuth, db:DbConn) -> Value{
          db.run(|c| {
             let result = rustaceans::table.limit(100).load::<Rustacean>(c).expect("failed to read rustaceans entries");
             json!(result)
