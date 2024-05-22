@@ -5,8 +5,11 @@ Rustacean API is a web service built with Rocket, Diesel, and SQLite. This servi
 `Get all Rustaceans`: Retrieve a list of all Rustaceans.
 
 `View a Rustacean`: Get detailed information about a specific Rustacean.
+
 `Create a Rustacean`: Add a new Rustacean to the database.
+
 `Update a Rustacean`: Update the information of an existing Rustacean.
+
 `Delete a Rustacean`: Remove a Rustacean from the database.
 
 ## Prerequisites
