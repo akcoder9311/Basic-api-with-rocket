@@ -17,9 +17,6 @@ Before running this project, ensure you have the following installed:
 ## Getting Started
 ### Clone the Repository
 
-## Getting Started
-### Clone the Repository
-
 `git clone https://github.com/yourusername/rustacean-api.git`
 `cd rustacean-api`
 
