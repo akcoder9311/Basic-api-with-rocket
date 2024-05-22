@@ -22,13 +22,16 @@ Before running this project, ensure you have the following installed:
 ### Clone the Repository
 
 `git clone https://github.com/yourusername/rustacean-api.git`
+
 `cd rustacean-api`
 
 ## Set Up the Database
 This project uses Diesel for ORM and database migrations. Initialize your database by running the following commands:
 
 `cargo install diesel_cli --no-default-features --features sqlite`
+
 `diesel setup`
+
 `diesel migration run`
 
 ## Environment Configuration
